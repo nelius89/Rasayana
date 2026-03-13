@@ -31,26 +31,17 @@
     .msg.user .msg-label { text-align: right; }
     .recipe-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; max-width: var(--chat-max); align-self: flex-start; animation: fadeUp 0.4s ease forwards; opacity: 0; }
     .recipe-header { background: linear-gradient(135deg, var(--sage) 0%, var(--sage-light) 100%); padding: 22px 22px 18px; color: white; }
-    .recipe-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
     .recipe-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; line-height: 1.2; }
-    .recipe-meta { display: flex; gap: 16px; font-size: 12px; opacity: 0.85; margin-top: 10px; }
     .recipe-body { padding: 20px 22px; }
-    .recipe-section { margin-bottom: 18px; }
-    .recipe-section-title { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--earth); margin-bottom: 8px; }
+    .recipe-section-title { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--earth); margin-top: 15px; margin-bottom: 8px; }
     .recipe-dosha { background: var(--sage-pale); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--sage); margin-bottom: 18px; }
-    .recipe-actions { padding: 16px 22px; border-top: 1px solid var(--border); background: var(--cream); }
-    .btn-save { width: 100%; padding: 10px 16px; background: var(--earth); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
-    .btn-save.saved { background: var(--sage); }
-    .typing { display: flex; align-items: center; gap: 5px; padding: 14px 18px; background: var(--white); border: 1px solid var(--border); border-radius: 18px; width: fit-content; }
-    .typing span { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
     .input-area { padding: 16px 20px 24px; background: var(--cream); border-top: 1px solid var(--border); }
     .input-row { display: flex; gap: 10px; max-width: var(--chat-max); margin: 0 auto; }
-    .chat-input { flex: 1; padding: 13px 16px; border: 1px solid var(--border); border-radius: 14px; outline: none; resize: none; }
+    .chat-input { flex: 1; padding: 13px 16px; border: 1px solid var(--border); border-radius: 14px; outline: none; resize: none; font-family: 'DM Sans', sans-serif; }
     .send-btn { width: 48px; height: 48px; background: var(--sage); border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .send-btn svg { fill: white; width: 20px; }
     .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
-    .suggestion-btn { padding: 10px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; margin-top: 10px; width: 100%; max-width: 320px; text-align: left; }
+    .suggestion-btn { padding: 10px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; margin-top: 10px; width: 100%; max-width: 320px; text-align: left; font-family: 'DM Sans', sans-serif; }
   </style>
 </head>
 <body>
@@ -70,12 +61,15 @@
   <div class="input-area">
     <div class="input-row">
       <textarea class="chat-input" id="chatInput" placeholder="Escribe aquí..." rows="1"></textarea>
-      <button class="send-btn" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+      <button class="send-btn" onclick="sendMessage()" id="sendBtn"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
     </div>
   </div>
 </div>
 <script>
   const API_URL = 'https://rasayana-proxy.manel89.workers.dev';
+  
+  const SYSTEM_PROMPT = "Eres un experto en Ayurveda para Manel (Vata-Pitta). Responde siempre recetas en JSON con: nombre, descripcion, dosha_nota, ingredientes (lista), pasos (lista). Si es charla, responde texto normal.";
+
   let conversationHistory = [];
 
   function useSuggestion(btn) {
@@ -106,76 +100,4 @@
         <ol>${recipe.pasos.map(p => `<li>${p}</li>`).join('')}</ol>
       </div>`;
     msgs.appendChild(card);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-async function sendMessage(overrideText) {
-    if (isLoading) return;
-    const input = document.getElementById('chatInput');
-    const text = overrideText || input.value.trim();
-    if (!text) return;
-
-    if (!overrideText) {
-      input.value = '';
-      autoResize(input);
-    }
-
-    isLoading = true;
-    document.getElementById('sendBtn').disabled = true;
-
-    addUserMessage(text);
-    
-    // Formateamos los mensajes de forma limpia para el Worker
-    const messagesToSend = [
-      { role: 'user', content: SYSTEM_PROMPT },
-      ...conversationHistory.map(m => ({
-        role: m.role === 'model' ? 'assistant' : 'user',
-        content: m.parts[0].text
-      })),
-      { role: 'user', content: text }
-    ];
-
-    addTyping();
-
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: messagesToSend }) // Solo enviamos los mensajes
-      });
-
-      const data = await response.json();
-      removeTyping();
-
-      if (!response.ok) throw new Error('Error en el Worker');
-
-      const rawText = data.choices[0].message.content;
-      
-      // Guardamos en el historial local
-      conversationHistory.push({ role: 'user', parts: [{ text }] });
-      conversationHistory.push({ role: 'model', parts: [{ text: rawText }] });
-
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          const recipe = JSON.parse(jsonMatch[0]);
-          addRecipeCard(recipe);
-        } catch (e) {
-          addTextMessage(rawText);
-        }
-      } else {
-        addTextMessage(rawText);
-      }
-
-    } catch (err) {
-      removeTyping();
-      addTextMessage('Error de conexión. Revisa que el Worker tenga la API Key y el código correcto.');
-      console.error(err);
-    }
-
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
-</script>
-</body>
-</html>
+    msgs.
