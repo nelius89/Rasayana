@@ -492,6 +492,7 @@
 </div>
 
 <script>
+  // URL DE TU WORKER CLOUDFLARE
   const API_URL = 'https://rasayana-proxy.manel89.workers.dev';
 
   const SYSTEM_PROMPT = `Eres una guía de cocina ayurvédica especializada en la realidad mediterránea española.
@@ -506,11 +507,12 @@ PERFIL DEL USUARIO:
 - Busca recetas con ingredientes fáciles de encontrar en España
 - Prefiere recetas simples y prácticas, sin técnicas complejas
 
-PARA VATA: favorece alimentos cálidos, húmedos, nutritivos, sabores dulce-ácido-salado. Evitar crudos en exceso, alimentos secos.
-PARA PITTA (secundario): moderar picante, acidez, alimentos muy calientes. Favorece refrescante y suave.
-EN VERANO: prioriza recetas frescas, ligeras, que no requieran mucho calor en cocina.
+REGLAS PARA RESPONDER:
+1. PARA VATA: favorece alimentos cálidos, húmedos, nutritivos.
+2. PARA PITTA (secundario): moderar picante y acidez.
+3. EN VERANO: prioriza recetas frescas.
 
-CUANDO SUGIERAS UNA RECETA, responde SIEMPRE en este formato JSON exacto (sin markdown, sin texto adicional):
+CUANDO SUGIERAS UNA RECETA, responde SIEMPRE en este formato JSON exacto:
 {
   "tipo": "receta",
   "nombre": "Nombre de la receta",
@@ -523,8 +525,7 @@ CUANDO SUGIERAS UNA RECETA, responde SIEMPRE en este formato JSON exacto (sin ma
   "categoria": "legumbres / ensalada / sopa / pasta / arroz / otro"
 }
 
-Si el usuario hace una pregunta general (no pide receta concreta), responde con texto normal conversacional, en español, cálido y directo. Sin JSON.
-Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece una alternativa en formato JSON receta.`;
+Si es charla general, responde con texto normal cálido y directo.`;
 
   let conversationHistory = [];
   let savedRecipes = JSON.parse(localStorage.getItem('rasayana_recipes') || '[]');
@@ -573,7 +574,6 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
   }
 
   function addTyping() {
-    hideEmptyState();
     const msgs = document.getElementById('messages');
     const el = document.createElement('div');
     el.id = 'typing';
@@ -634,16 +634,9 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
         </div>
       </div>
       <div class="recipe-actions">
-        <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleSave('${id}', ${JSON.stringify(recipe).replace(/'/g, '&#39;')})">
-          ${isSaved ? '✓ Guardada en Mis recetas' : '♡ Guardar receta'}
+        <button class="btn-save ${isSaved ? 'saved' : ''}" onclick='toggleSave("${id}", ${JSON.stringify(recipe).replace(/'/g, "&apos;")})'>
+          ${isSaved ? '✓ Guardada' : '♡ Guardar receta'}
         </button>
-      </div>
-      <div class="feedback-box">
-        <div class="feedback-label">¿Algo que no te convence? ¿Algún ingrediente que no tienes o no te gusta?</div>
-        <div class="feedback-row">
-          <input type="text" class="feedback-input" placeholder="Cuéntame…" onkeydown="if(event.key==='Enter') sendFeedback(this, '${escapeHtml(recipe.nombre)}')" />
-          <button class="feedback-btn" onclick="sendFeedback(this.previousElementSibling, '${escapeHtml(recipe.nombre)}')">Pedir variación</button>
-        </div>
       </div>
     `;
     msgs.appendChild(card);
@@ -655,7 +648,7 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
     const idx = savedRecipes.findIndex(r => r.nombre === recipe.nombre);
     if (idx === -1) {
       savedRecipes.push(recipe);
-      btn.textContent = '✓ Guardada en Mis recetas';
+      btn.textContent = '✓ Guardada';
       btn.classList.add('saved');
     } else {
       savedRecipes.splice(idx, 1);
@@ -663,14 +656,6 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
       btn.classList.remove('saved');
     }
     localStorage.setItem('rasayana_recipes', JSON.stringify(savedRecipes));
-  }
-
-  async function sendFeedback(input, recipeName) {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    const msg = `Sobre la receta "${recipeName}": ${text}`;
-    await sendMessage(msg);
   }
 
   async function sendMessage(overrideText) {
@@ -688,56 +673,49 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
     document.getElementById('sendBtn').disabled = true;
 
     addUserMessage(text);
-    conversationHistory.push({ role: 'user', parts: [{ text }] });
+    
+    // Si es el primer mensaje, añadimos el SYSTEM_PROMPT
+    let messagesToSend = [];
+    if (conversationHistory.length === 0) {
+        messagesToSend.push({ role: "user", content: SYSTEM_PROMPT });
+    }
+    
+    conversationHistory.push({ role: "user", content: text });
+    messagesToSend = [...messagesToSend, ...conversationHistory];
 
-    const typing = addTyping();
+    addTyping();
 
     try {
-      const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...conversationHistory.map(m => ({
-          role: m.role === 'model' ? 'assistant' : 'user',
-          content: m.parts[0].text
-        }))
-      ];
-
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-8b-instruct:free',
-          messages: messages,
-          temperature: 0.8,
-          max_tokens: 1500
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: messagesToSend })
       });
 
       const data = await response.json();
       removeTyping();
 
-      if (!response.ok) throw new Error(data.error?.message || 'Error de API');
+      if (!response.ok) throw new Error('Error en la respuesta');
 
-      const rawText = data.choices?.[0]?.message?.content || '';
-      conversationHistory.push({ role: 'model', parts: [{ text: rawText }] });
+      const rawText = data.choices[0].message.content;
+      conversationHistory.push({ role: "assistant", content: rawText });
 
-      // Intentar parsear como receta
-      const cleaned = rawText.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-      try {
-        const json = JSON.parse(cleaned);
-        if (json.tipo === 'receta') {
-          addRecipeCard(json);
-        } else {
+      // Detectar si es JSON
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const recipe = JSON.parse(jsonMatch[0]);
+          addRecipeCard(recipe);
+        } catch (e) {
           addTextMessage(rawText);
         }
-      } catch {
+      } else {
         addTextMessage(rawText);
       }
 
     } catch (err) {
       removeTyping();
-      addTextMessage('Ha habido un error al conectar con la API. Comprueba tu conexión o la API key.');
+      addTextMessage('Lo siento Manel, parece que mi conexión ayurvédica está fallando. ¿Revisaste el Worker de Cloudflare?');
       console.error(err);
     }
 
