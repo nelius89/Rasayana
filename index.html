@@ -109,39 +109,72 @@
     msgs.scrollTop = msgs.scrollHeight;
   }
 
-  async function sendMessage() {
+async function sendMessage(overrideText) {
+    if (isLoading) return;
     const input = document.getElementById('chatInput');
-    const text = input.value.trim();
+    const text = overrideText || input.value.trim();
     if (!text) return;
-    
-    const empty = document.getElementById('emptyState');
-    if (empty) empty.remove();
 
-    addTextMessage(text, 'user');
-    input.value = '';
+    if (!overrideText) {
+      input.value = '';
+      autoResize(input);
+    }
+
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+
+    addUserMessage(text);
     
-    conversationHistory.push({ role: 'user', content: text });
+    // Formateamos los mensajes de forma limpia para el Worker
+    const messagesToSend = [
+      { role: 'user', content: SYSTEM_PROMPT },
+      ...conversationHistory.map(m => ({
+        role: m.role === 'model' ? 'assistant' : 'user',
+        content: m.parts[0].text
+      })),
+      { role: 'user', content: text }
+    ];
+
+    addTyping();
 
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory })
+        body: JSON.stringify({ messages: messagesToSend }) // Solo enviamos los mensajes
       });
 
       const data = await response.json();
-      const rawText = data.choices[0].message.content;
-      conversationHistory.push({ role: 'assistant', content: rawText });
+      removeTyping();
 
-      if (rawText.includes('{')) {
-        const json = JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
-        addRecipeCard(json);
+      if (!response.ok) throw new Error('Error en el Worker');
+
+      const rawText = data.choices[0].message.content;
+      
+      // Guardamos en el historial local
+      conversationHistory.push({ role: 'user', parts: [{ text }] });
+      conversationHistory.push({ role: 'model', parts: [{ text: rawText }] });
+
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const recipe = JSON.parse(jsonMatch[0]);
+          addRecipeCard(recipe);
+        } catch (e) {
+          addTextMessage(rawText);
+        }
       } else {
-        addTextMessage(rawText, 'app');
+        addTextMessage(rawText);
       }
+
     } catch (err) {
-      addTextMessage('Error de conexión. Revisa que el Worker tenga la API Key.', 'app');
+      removeTyping();
+      addTextMessage('Error de conexión. Revisa que el Worker tenga la API Key y el código correcto.');
+      console.error(err);
     }
+
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
   }
 </script>
 </body>
