@@ -7,725 +7,141 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --sage: #6B7F5E;
-      --sage-light: #8FA37E;
-      --sage-pale: #EDF0E8;
-      --earth: #C4956A;
-      --earth-pale: #F5EDE3;
-      --cream: #FAF7F2;
-      --text: #2C2C28;
-      --text-muted: #8A8A7A;
-      --border: #E2DDD4;
-      --white: #FFFFFF;
-      --chat-max: 680px;
+      --sage: #6B7F5E; --sage-light: #8FA37E; --sage-pale: #EDF0E8;
+      --earth: #C4956A; --earth-pale: #F5EDE3; --cream: #FAF7F2;
+      --text: #2C2C28; --text-muted: #8A8A7A; --border: #E2DDD4;
+      --white: #FFFFFF; --chat-max: 680px;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--cream);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* HEADER */
-    header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      background: var(--cream);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      color: var(--sage);
-    }
-
-    .logo span {
-      color: var(--earth);
-      font-style: italic;
-    }
-
-    .dosha-badge {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      background: var(--sage-pale);
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    /* CHAT CONTAINER */
-    .chat-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      padding-top: 60px;
-      padding-bottom: 0;
-    }
-
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 28px 20px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      scroll-behavior: smooth;
-    }
-
-    .messages::-webkit-scrollbar { width: 4px; }
-    .messages::-webkit-scrollbar-track { background: transparent; }
-    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    /* MENSAJES */
-    .msg {
-      display: flex;
-      flex-direction: column;
-      max-width: var(--chat-max);
-      animation: fadeUp 0.3s ease forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    html, body { height: 100%; background: var(--cream); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; letter-spacing: 0.08em; color: var(--sage); }
+    .logo span { color: var(--earth); font-style: italic; }
+    .dosha-badge { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); background: var(--sage-pale); padding: 4px 10px; border-radius: 20px; }
+    .chat-wrapper { display: flex; flex-direction: column; height: 100vh; padding-top: 60px; }
+    .messages { flex: 1; overflow-y: auto; padding: 28px 20px 20px; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+    .msg { display: flex; flex-direction: column; max-width: var(--chat-max); animation: fadeUp 0.3s ease forwards; opacity: 0; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .msg.app { align-self: flex-start; }
     .msg.user { align-self: flex-end; }
-
-    .msg-bubble {
-      padding: 14px 18px;
-      border-radius: 18px;
-      line-height: 1.65;
-    }
-
-    .msg.app .msg-bubble {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-bottom-left-radius: 4px;
-      color: var(--text);
-      font-size: 14.5px;
-    }
-
-    .msg.user .msg-bubble {
-      background: var(--sage);
-      color: var(--white);
-      border-bottom-right-radius: 4px;
-      font-size: 14.5px;
-    }
-
-    .msg-label {
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
+    .msg-bubble { padding: 14px 18px; border-radius: 18px; line-height: 1.65; }
+    .msg.app .msg-bubble { background: var(--white); border: 1px solid var(--border); border-bottom-left-radius: 4px; font-size: 14.5px; }
+    .msg.user .msg-bubble { background: var(--sage); color: var(--white); border-bottom-right-radius: 4px; font-size: 14.5px; }
+    .msg-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
     .msg.user .msg-label { text-align: right; }
-
-    /* FICHA DE RECETA */
-    .recipe-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      max-width: var(--chat-max);
-      align-self: flex-start;
-      animation: fadeUp 0.4s ease forwards;
-      opacity: 0;
-    }
-
-    .recipe-header {
-      background: linear-gradient(135deg, var(--sage) 0%, var(--sage-light) 100%);
-      padding: 22px 22px 18px;
-      color: white;
-    }
-
-    .recipe-tag {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      opacity: 0.8;
-      margin-bottom: 6px;
-    }
-
-    .recipe-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 26px;
-      font-weight: 300;
-      line-height: 1.2;
-      margin-bottom: 6px;
-    }
-
-    .recipe-meta {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      opacity: 0.85;
-      margin-top: 10px;
-    }
-
-    .recipe-meta span { display: flex; align-items: center; gap: 4px; }
-
+    .recipe-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; max-width: var(--chat-max); align-self: flex-start; animation: fadeUp 0.4s ease forwards; opacity: 0; }
+    .recipe-header { background: linear-gradient(135deg, var(--sage) 0%, var(--sage-light) 100%); padding: 22px 22px 18px; color: white; }
+    .recipe-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
+    .recipe-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; line-height: 1.2; }
+    .recipe-meta { display: flex; gap: 16px; font-size: 12px; opacity: 0.85; margin-top: 10px; }
     .recipe-body { padding: 20px 22px; }
-
     .recipe-section { margin-bottom: 18px; }
-
-    .recipe-section-title {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--earth);
-      margin-bottom: 8px;
-    }
-
-    .recipe-section p {
-      font-size: 13.5px;
-      color: var(--text);
-      line-height: 1.65;
-    }
-
-    .recipe-section ul, .recipe-section ol {
-      padding-left: 18px;
-      font-size: 13.5px;
-      color: var(--text);
-      line-height: 1.8;
-    }
-
-    .recipe-dosha {
-      background: var(--sage-pale);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 13px;
-      color: var(--sage);
-      line-height: 1.55;
-      margin-bottom: 18px;
-    }
-
-    .recipe-dosha::before {
-      content: "🌿 ";
-    }
-
-    .recipe-actions {
-      display: flex;
-      gap: 10px;
-      padding: 16px 22px;
-      border-top: 1px solid var(--border);
-      background: var(--cream);
-    }
-
-    .btn-save {
-      flex: 1;
-      padding: 10px 16px;
-      background: var(--earth);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .btn-save:hover { opacity: 0.85; }
+    .recipe-section-title { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--earth); margin-bottom: 8px; }
+    .recipe-dosha { background: var(--sage-pale); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--sage); margin-bottom: 18px; }
+    .recipe-actions { padding: 16px 22px; border-top: 1px solid var(--border); background: var(--cream); }
+    .btn-save { width: 100%; padding: 10px 16px; background: var(--earth); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; }
     .btn-save.saved { background: var(--sage); }
-
-    /* FEEDBACK BOX */
-    .feedback-box {
-      padding: 16px 22px;
-      border-top: 1px solid var(--border);
-    }
-
-    .feedback-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      font-style: italic;
-    }
-
-    .feedback-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .feedback-input {
-      flex: 1;
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      background: var(--white);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .feedback-input:focus { border-color: var(--sage-light); }
-
-    .feedback-btn {
-      padding: 9px 14px;
-      background: var(--sage-pale);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--sage);
-      font-size: 13px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.2s;
-    }
-
-    .feedback-btn:hover { background: var(--border); }
-
-    /* TYPING INDICATOR */
-    .typing {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 14px 18px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      border-bottom-left-radius: 4px;
-      width: fit-content;
-      animation: fadeUp 0.3s ease forwards;
-    }
-
-    .typing span {
-      width: 6px; height: 6px;
-      background: var(--text-muted);
-      border-radius: 50%;
-      animation: bounce 1.2s infinite;
-    }
-
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
-    }
-
-    /* INPUT AREA */
-    .input-area {
-      padding: 16px 20px 24px;
-      background: var(--cream);
-      border-top: 1px solid var(--border);
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      max-width: var(--chat-max);
-      margin: 0 auto;
-    }
-
-    .chat-input {
-      flex: 1;
-      padding: 13px 16px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      background: var(--white);
-      color: var(--text);
-      outline: none;
-      resize: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      line-height: 1.5;
-      min-height: 48px;
-      max-height: 120px;
-    }
-
-    .chat-input:focus {
-      border-color: var(--sage-light);
-      box-shadow: 0 0 0 3px rgba(107, 127, 94, 0.1);
-    }
-
-    .chat-input::placeholder { color: var(--text-muted); }
-
-    .send-btn {
-      width: 48px; height: 48px;
-      background: var(--sage);
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .send-btn:hover { background: var(--sage-light); }
-    .send-btn:active { transform: scale(0.95); }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .send-btn svg { fill: white; width: 20px; height: 20px; }
-
-    /* EMPTY STATE */
-    .empty-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px 30px;
-      gap: 12px;
-      animation: fadeUp 0.5s ease forwards;
-    }
-
-    .empty-icon {
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-
-    .empty-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 300;
-      color: var(--text);
-      line-height: 1.3;
-    }
-
-    .empty-sub {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 280px;
-      line-height: 1.6;
-    }
-
-    .suggestions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    .suggestion-btn {
-      padding: 10px 16px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13.5px;
-      color: var(--text);
-      cursor: pointer;
-      text-align: left;
-      transition: border-color 0.2s, background 0.2s;
-      line-height: 1.4;
-    }
-
-    .suggestion-btn:hover {
-      border-color: var(--sage-light);
-      background: var(--sage-pale);
-    }
-
-    @media (min-width: 600px) {
-      .messages { padding: 28px 32px 20px; }
-      .input-area { padding: 16px 32px 28px; }
-    }
+    .typing { display: flex; align-items: center; gap: 5px; padding: 14px 18px; background: var(--white); border: 1px solid var(--border); border-radius: 18px; width: fit-content; }
+    .typing span { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+    .input-area { padding: 16px 20px 24px; background: var(--cream); border-top: 1px solid var(--border); }
+    .input-row { display: flex; gap: 10px; max-width: var(--chat-max); margin: 0 auto; }
+    .chat-input { flex: 1; padding: 13px 16px; border: 1px solid var(--border); border-radius: 14px; outline: none; resize: none; }
+    .send-btn { width: 48px; height: 48px; background: var(--sage); border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .send-btn svg { fill: white; width: 20px; }
+    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+    .suggestion-btn { padding: 10px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; margin-top: 10px; width: 100%; max-width: 320px; text-align: left; }
   </style>
 </head>
 <body>
-
 <header>
   <div class="logo">Rasa<span>yana</span></div>
   <div class="dosha-badge">Vata · Pitta</div>
 </header>
-
 <div class="chat-wrapper">
   <div class="messages" id="messages">
     <div class="empty-state" id="emptyState">
       <div class="empty-icon">🌿</div>
-      <div class="empty-title">Hola, Manel.<br>¿En qué necesitas ideas hoy?</div>
-      <div class="empty-sub">Cuéntame qué te apetece, qué tienes en casa, o simplemente cómo te encuentras.</div>
-      <div class="suggestions">
-        <button class="suggestion-btn" onclick="useSuggestion(this)">No sé qué cenar, algo ligero y fresco 🌙</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">Tengo garbanzos y no sé qué hacer con ellos</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">Necesito algo rápido para comer, menos de 20 min</button>
-      </div>
+      <div class="empty-title">Hola, Manel.<br>¿Qué cocinamos hoy?</div>
+      <div class="suggestion-btn" onclick="useSuggestion(this)">No sé qué cenar, algo ligero 🌙</div>
+      <div class="suggestion-btn" onclick="useSuggestion(this)">Tengo garbanzos, ¿alguna idea?</div>
     </div>
   </div>
-
   <div class="input-area">
     <div class="input-row">
-      <textarea
-        class="chat-input"
-        id="chatInput"
-        placeholder="Cuéntame qué necesitas…"
-        rows="1"
-        onkeydown="handleKey(event)"
-        oninput="autoResize(this)"
-      ></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-        </svg>
-      </button>
+      <textarea class="chat-input" id="chatInput" placeholder="Escribe aquí..." rows="1"></textarea>
+      <button class="send-btn" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
     </div>
   </div>
 </div>
-
 <script>
-  // URL DE TU WORKER CLOUDFLARE
   const API_URL = 'https://rasayana-proxy.manel89.workers.dev';
-
-  const SYSTEM_PROMPT = `Eres una guía de cocina ayurvédica especializada en la realidad mediterránea española.
-
-PERFIL DEL USUARIO:
-- Nombre: Manel
-- Dosha predominante: Vata, con algo de Pitta
-- No come carne. Puede comer pescado y huevo puntualmente, base vegetal.
-- Le gustan las legumbres pero le cuesta incorporarlas en verano
-- En verano pierde el apetito y necesita ideas frescas y ligeras
-- Le gusta la cocina asiática además de la mediterránea
-- Busca recetas con ingredientes fáciles de encontrar en España
-- Prefiere recetas simples y prácticas, sin técnicas complejas
-
-REGLAS PARA RESPONDER:
-1. PARA VATA: favorece alimentos cálidos, húmedos, nutritivos.
-2. PARA PITTA (secundario): moderar picante y acidez.
-3. EN VERANO: prioriza recetas frescas.
-
-CUANDO SUGIERAS UNA RECETA, responde SIEMPRE en este formato JSON exacto:
-{
-  "tipo": "receta",
-  "nombre": "Nombre de la receta",
-  "descripcion": "2-3 líneas describiendo el plato",
-  "dosha_nota": "Por qué es buena para Vata-Pitta",
-  "tiempo": "X minutos",
-  "dificultad": "Fácil / Media",
-  "ingredientes": ["ingrediente 1", "ingrediente 2"],
-  "pasos": ["Paso 1", "Paso 2", "Paso 3"],
-  "categoria": "legumbres / ensalada / sopa / pasta / arroz / otro"
-}
-
-Si es charla general, responde con texto normal cálido y directo.`;
-
   let conversationHistory = [];
-  let savedRecipes = JSON.parse(localStorage.getItem('rasayana_recipes') || '[]');
-  let isLoading = false;
-
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-  }
-
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
 
   function useSuggestion(btn) {
-    const input = document.getElementById('chatInput');
-    input.value = btn.textContent.replace(/[🌙]/g, '').trim();
-    autoResize(input);
+    document.getElementById('chatInput').value = btn.innerText;
     sendMessage();
   }
 
-  function hideEmptyState() {
-    const es = document.getElementById('emptyState');
-    if (es) es.remove();
-  }
-
-  function scrollToBottom() {
+  function addTextMessage(text, role) {
     const msgs = document.getElementById('messages');
+    const el = document.createElement('div');
+    el.className = `msg ${role === 'user' ? 'user' : 'app'}`;
+    el.innerHTML = `<div class="msg-label">${role === 'user' ? 'Tú' : 'Rasayana'}</div><div class="msg-bubble">${text}</div>`;
+    msgs.appendChild(el);
     msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  function addUserMessage(text) {
-    hideEmptyState();
-    const msgs = document.getElementById('messages');
-    const el = document.createElement('div');
-    el.className = 'msg user';
-    el.innerHTML = `
-      <div class="msg-label">Tú</div>
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-    `;
-    msgs.appendChild(el);
-    scrollToBottom();
-  }
-
-  function addTyping() {
-    const msgs = document.getElementById('messages');
-    const el = document.createElement('div');
-    el.id = 'typing';
-    el.className = 'typing';
-    el.innerHTML = '<span></span><span></span><span></span>';
-    msgs.appendChild(el);
-    scrollToBottom();
-    return el;
-  }
-
-  function removeTyping() {
-    const t = document.getElementById('typing');
-    if (t) t.remove();
-  }
-
-  function addTextMessage(text) {
-    const msgs = document.getElementById('messages');
-    const el = document.createElement('div');
-    el.className = 'msg app';
-    el.innerHTML = `
-      <div class="msg-label">Rasayana</div>
-      <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
-    `;
-    msgs.appendChild(el);
-    scrollToBottom();
   }
 
   function addRecipeCard(recipe) {
     const msgs = document.getElementById('messages');
-    const isSaved = savedRecipes.some(r => r.nombre === recipe.nombre);
-    const id = 'recipe_' + Date.now();
-
     const card = document.createElement('div');
     card.className = 'recipe-card';
-    card.id = id;
     card.innerHTML = `
-      <div class="recipe-header">
-        <div class="recipe-tag">✦ Receta ayurvédica · ${recipe.categoria}</div>
-        <div class="recipe-name">${escapeHtml(recipe.nombre)}</div>
-        <div class="recipe-meta">
-          <span>⏱ ${escapeHtml(recipe.tiempo)}</span>
-          <span>◈ ${escapeHtml(recipe.dificultad)}</span>
-        </div>
-      </div>
+      <div class="recipe-header"><div class="recipe-name">${recipe.nombre}</div></div>
       <div class="recipe-body">
-        <div class="recipe-dosha">${escapeHtml(recipe.dosha_nota)}</div>
-        <div class="recipe-section">
-          <div class="recipe-section-title">Descripción</div>
-          <p>${escapeHtml(recipe.descripcion)}</p>
-        </div>
-        <div class="recipe-section">
-          <div class="recipe-section-title">Ingredientes</div>
-          <ul>${recipe.ingredientes.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
-        </div>
-        <div class="recipe-section">
-          <div class="recipe-section-title">Preparación</div>
-          <ol>${recipe.pasos.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ol>
-        </div>
-      </div>
-      <div class="recipe-actions">
-        <button class="btn-save ${isSaved ? 'saved' : ''}" onclick='toggleSave("${id}", ${JSON.stringify(recipe).replace(/'/g, "&apos;")})'>
-          ${isSaved ? '✓ Guardada' : '♡ Guardar receta'}
-        </button>
-      </div>
-    `;
+        <div class="recipe-dosha">${recipe.dosha_nota}</div>
+        <div class="recipe-section-title">Ingredientes</div>
+        <ul>${recipe.ingredientes.map(i => `<li>${i}</li>`).join('')}</ul>
+        <div class="recipe-section-title">Pasos</div>
+        <ol>${recipe.pasos.map(p => `<li>${p}</li>`).join('')}</ol>
+      </div>`;
     msgs.appendChild(card);
-    scrollToBottom();
+    msgs.scrollTop = msgs.scrollHeight;
   }
 
-  function toggleSave(cardId, recipe) {
-    const btn = document.querySelector(`#${cardId} .btn-save`);
-    const idx = savedRecipes.findIndex(r => r.nombre === recipe.nombre);
-    if (idx === -1) {
-      savedRecipes.push(recipe);
-      btn.textContent = '✓ Guardada';
-      btn.classList.add('saved');
-    } else {
-      savedRecipes.splice(idx, 1);
-      btn.textContent = '♡ Guardar receta';
-      btn.classList.remove('saved');
-    }
-    localStorage.setItem('rasayana_recipes', JSON.stringify(savedRecipes));
-  }
-
-  async function sendMessage(overrideText) {
-    if (isLoading) return;
+  async function sendMessage() {
     const input = document.getElementById('chatInput');
-    const text = overrideText || input.value.trim();
+    const text = input.value.trim();
     if (!text) return;
-
-    if (!overrideText) {
-      input.value = '';
-      autoResize(input);
-    }
-
-    isLoading = true;
-    document.getElementById('sendBtn').disabled = true;
-
-    addUserMessage(text);
     
-    // Si es el primer mensaje, añadimos el SYSTEM_PROMPT
-    let messagesToSend = [];
-    if (conversationHistory.length === 0) {
-        messagesToSend.push({ role: "user", content: SYSTEM_PROMPT });
-    }
-    
-    conversationHistory.push({ role: "user", content: text });
-    messagesToSend = [...messagesToSend, ...conversationHistory];
+    const empty = document.getElementById('emptyState');
+    if (empty) empty.remove();
 
-    addTyping();
+    addTextMessage(text, 'user');
+    input.value = '';
+    
+    conversationHistory.push({ role: 'user', content: text });
 
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: messagesToSend })
+        body: JSON.stringify({ messages: conversationHistory })
       });
 
       const data = await response.json();
-      removeTyping();
-
-      if (!response.ok) throw new Error('Error en la respuesta');
-
       const rawText = data.choices[0].message.content;
-      conversationHistory.push({ role: "assistant", content: rawText });
+      conversationHistory.push({ role: 'assistant', content: rawText });
 
-      // Detectar si es JSON
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          const recipe = JSON.parse(jsonMatch[0]);
-          addRecipeCard(recipe);
-        } catch (e) {
-          addTextMessage(rawText);
-        }
+      if (rawText.includes('{')) {
+        const json = JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+        addRecipeCard(json);
       } else {
-        addTextMessage(rawText);
+        addTextMessage(rawText, 'app');
       }
-
     } catch (err) {
-      removeTyping();
-      addTextMessage('Lo siento Manel, parece que mi conexión ayurvédica está fallando. ¿Revisaste el Worker de Cloudflare?');
-      console.error(err);
+      addTextMessage('Error de conexión. Revisa que el Worker tenga la API Key.', 'app');
     }
-
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
-
-  function escapeHtml(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
 </body>
