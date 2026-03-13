@@ -492,8 +492,7 @@
 </div>
 
 <script>
-  const API_KEY = 'AIzaSyDnbhAckC45gk-zTZxP67wL4PIHhId5jrc';
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+  const API_URL = 'https://rasayana-proxy.manel89.workers.dev';
 
   const SYSTEM_PROMPT = `Eres una guía de cocina ayurvédica especializada en la realidad mediterránea española.
 
@@ -694,13 +693,24 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
     const typing = addTyping();
 
     try {
+      const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...conversationHistory.map(m => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.parts[0].text
+        }))
+      ];
+
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: conversationHistory,
-          generationConfig: { temperature: 0.8, maxOutputTokens: 1500 }
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages,
+          temperature: 0.8,
+          max_tokens: 1500
         })
       });
 
@@ -709,7 +719,7 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
 
       if (!response.ok) throw new Error(data.error?.message || 'Error de API');
 
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const rawText = data.choices?.[0]?.message?.content || '';
       conversationHistory.push({ role: 'model', parts: [{ text: rawText }] });
 
       // Intentar parsear como receta
