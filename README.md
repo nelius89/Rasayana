@@ -1,0 +1,2 @@
+# Rasayana
+Ayurveda ideas
