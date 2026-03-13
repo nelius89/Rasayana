@@ -704,11 +704,11 @@ Si el usuario pide una variación o tiene una objeción sobre una receta, ofrece
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: 'google/gemini-2.0-flash-exp:free',
-          messages,
+          messages: messages,
           temperature: 0.8,
           max_tokens: 1500
         })
